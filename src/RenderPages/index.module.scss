@@ -1,0 +1,33 @@
+$height: 4em;
+
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.profilepiccontainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: $height;
+  width: $height;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+
+.profilepic {
+  height: 100%;
+  width: auto;
+}
+
+.profilename {
+  font-size: $height;
+}
+
+.fakelink {
+  color: inherit;
+  text-decoration: inherit;
+}

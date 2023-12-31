@@ -1,0 +1,52 @@
+.flipped {
+  transform: scaleX(-1);
+}
+
+.asTable {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.navButton {
+  width: 10%;
+  vertical-align: middle;
+  cursor: pointer;
+  opacity: 0.15;
+  transition: opacity 0.5s ease;
+}
+
+.asTable:hover .navButton {
+  opacity: 1;
+}
+
+.navButton > img {
+  width: 40%;
+  margin: auto;
+  display: block;
+}
+
+.navContent{
+  width: 80%;
+}
+
+.navButton, .navContent {
+  display: table-cell;
+}
+
+.slideContainer {
+  display: grid;
+  align-items: center;
+}
+
+.slide {
+  opacity: 1;
+  transition: opacity .5s ease;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/* MUST be defined after .slide to take precedence */
+.fadeOut {
+  opacity: 0;
+}

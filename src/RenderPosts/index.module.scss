@@ -1,0 +1,16 @@
+.post {
+  margin: 0 auto;
+  text-align: center;
+
+  width: 80%;
+  @media (orientation: landscape) {
+    & {
+      width: 50%;
+    }
+  }
+
+  .media {
+    width: 100%;
+    height: auto;
+  }
+}
