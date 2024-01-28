@@ -35,7 +35,7 @@ interface SlideShowState {
 }
 
 export class BasicSlideshow extends Component<SlideShowProps, SlideShowState> {
-  timer?: NodeJS.Timer;
+  timer?: NodeJS.Timeout;
   constructor(props: SlideShowProps) {
     super(props);
 

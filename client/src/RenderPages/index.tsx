@@ -1,19 +1,18 @@
 import { Fragment } from "react";
-import { RenderPosts } from "../RenderPosts";
-import { Page } from "../getData";
+import { RenderPost } from "../RenderPosts";
+import { Post } from "../shared/Post";
 
 import style from "./index.module.scss";
 
 interface RenderPagesProps {
-  pages: Page[]
+  posts: Post[]
 }
 
-export function RenderPages({ pages }: RenderPagesProps) {
-  return <>{pages.map(p => (
-    !!p.posts.length && 
-    <Fragment key={p.name}>
-      <Profile name={p.name} src={p.profile} />
-      <RenderPosts posts={p.posts} />
+export function RenderPages({ posts }: RenderPagesProps) {
+  return <>{posts.map(p => (
+    <Fragment key={p.page.name}>
+      <Profile name={p.page.name} src={p.page.profile} />
+      <RenderPost post={p} />
     </Fragment>
   ))}</>;
 }

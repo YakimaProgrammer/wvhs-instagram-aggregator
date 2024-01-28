@@ -1,25 +1,17 @@
-import { Post } from "../getData";
+import { Post } from "../shared/Post";
 import { DateDisplay } from "./DateDisplay";
 import { BasicSlideshow } from "./Slideshow";
 
 import style from "./index.module.scss";
 
-interface RenderPostsProps {
-  posts: Post[]
-}
-
-export function RenderPosts({ posts }: RenderPostsProps) {
-  return <>{posts.map(p => <RenderPost key={p.srcs[0] + p.caption} post={p} />)}</>
-}
-
 interface RenderPostProps {
   post: Post;
 }
 
-function RenderPost({ post }: RenderPostProps) {
+export function RenderPost({ post }: RenderPostProps) {
   return (
     <div className={style.post}>
-      <h2><DateDisplay date={post.time} /></h2>
+      <h2 className={style.date}><DateDisplay date={new Date(post.time)} /></h2>
       <PostImages srcs={post.srcs} />
       <p>{post.caption}</p>
     </div>

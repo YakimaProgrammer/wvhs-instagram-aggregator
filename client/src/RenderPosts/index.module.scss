@@ -14,3 +14,11 @@
     height: auto;
   }
 }
+
+//Seems about right
+$height: 1.2em;
+
+.date {
+  font-size: $height;
+  font-weight: bold;
+}
