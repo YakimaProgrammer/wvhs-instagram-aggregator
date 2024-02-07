@@ -26,7 +26,7 @@ async def get_stories(sess, session_id, userid):
   async with sess.post(f"{args.server}/story/user_stories", data={"sessionid": session_id, "user_id": userid}) as resp:
     return await resp.json()
 
-#Truely one of the most blocking functions of all time
+#Truly one of the most blocking functions of all time
 #Aligns with Instaloader's format for filenames
 def map_iso_date_to_filename(isodate):
   dt = datetime.fromisoformat(isodate)

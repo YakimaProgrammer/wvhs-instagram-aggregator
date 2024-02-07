@@ -2,7 +2,7 @@ import { fsPoly } from "./fs";
 import * as fsNative from "fs/promises";
 
 export class fs implements fsPoly {
-  //Ideally a url
+  //Ideally an absolute path
   base: string;
 
   constructor(base: string) {
