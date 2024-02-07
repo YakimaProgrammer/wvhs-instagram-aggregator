@@ -22,6 +22,7 @@
   "scripts": {
     "start": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "echo -e '\\n<!-- Hello! If you are curious about how this project was built or want to contribute, you can find the source code and documentation here: https://github.com/YakimaProgrammer/wvhs-instagram-aggregator -->' >> build/index.html",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
