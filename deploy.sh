@@ -5,7 +5,7 @@
 ( cd server && npm run build && cd dist && scp -r * hp:/opt/instagram-aggregator ) &
 
 #Copy over the download script
-scp story-downloader/downloader.py hp:/opt/story-downloader &
+scp account-downloader/*.py hp:/opt/account-downloader &
 
 wait
 
