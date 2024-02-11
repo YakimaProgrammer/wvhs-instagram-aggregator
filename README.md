@@ -245,10 +245,10 @@ $ pip install -r requirements.txt
 On your server, run `$ crontab -e`
 Add this line to automatically update the Instagram post database every day at 9am:
 ```
-0 9 * * * /opt/account-downloader/env/bin/python3 /opt/account-downloader/downloader.py --outputdir /var/www/api.magnusfulton.com/instagram --username <your puppet account username> --password '<your puppet account password>' --account <a space seperated list of accounts to download>
+0 9 * * * /opt/account-downloader/env/bin/python3 /opt/account-downloader/downloader.py --outputdir /var/www/instagram-aggregator/instagram/ --username <your puppet account username> --password '<your puppet account password>' --account <a space seperated list of accounts to download>
 ```
 ... and then manually run that command right now to build the database:
-`$ /opt/account-downloader/env/bin/python3 /opt/account-downloader/downloader.py --outputdir /var/www/api.magnusfulton.com/instagram --username <your puppet account username> --password '<your puppet account password>' --account <a space seperated list of accounts to download>`
+`$ /opt/account-downloader/env/bin/python3 /opt/account-downloader/downloader.py --outputdir /var/www/instagram-aggregator/instagram/ --username <your puppet account username> --password '<your puppet account password>' --account <a space seperated list of accounts to download>`
 
 ### Celebrate!
 
