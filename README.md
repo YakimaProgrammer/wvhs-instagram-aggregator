@@ -1,12 +1,13 @@
+
 # Welcome to wvhs-instagram-aggregator!
 
 West Valley High School uses social media, primarily Instagram, to keep students informed about what's going on. Unfortunately, not everyone at WVHS has Instagram (or is even allowed to have it), so I wrote this aggregator tool. Here's a guide to what each part of this tool is, and how to set something like this up again in the future (...or fix it when everything inevitably breaks).   
 # Project Organization
 This tool is made of four components:
-1. **[The Webclient](https://wvhs-instagram.magnusfulton.com/)** - responsible for actually showing the Instagram posts to students. This code is stored in `client/`.
-2. **[The API](https://api.magnusfulton.com/instagram/api)** - responsible for sorting through the database of downloaded posts and returning them in a format that is meaningful to the webclient. This code is stored in `server/`.
-3. **The Downloader** - responsible for downloading the posts every morning. This code is stored in `account-downloader/`.
-4. **The Server** - responsible for actually serving content to students. I'm using [nginx](https://nginx.org/en/).
+1. **The Webclient** - [the webpage](https://wvhs-instagram.magnusfulton.com/) responsible for actually showing the Instagram posts to students. This code is stored in `client/`.
+2. **The API** - [the API](https://api.magnusfulton.com/instagram/api) responsible for sorting through the database of downloaded posts and returning them in a format that is meaningful to the webclient. This code is stored in `server/`.
+3. **The Downloader** - the program responsible for downloading the Instagram posts every morning. I'm using [`instaloader`](https://github.com/instaloader/instaloader).
+4. **The Server** - the HTTP software responsible for actually serving content to students. I'm using [nginx](https://nginx.org/en/).
 
 # Setup
 These instructions assume you are on a Debian-based system. I'd recommend cloning this repository to somewhere sane on whatever device you're developing on. 
@@ -62,31 +63,18 @@ You'll (hopefully) see something that looks like this:
 > wvhs-instagram-server@1.0.0 build
 > npx tsc
 ```
+... and then the shell will exit, signifying everything compiled successfully.
 ## The Downloader
-The downloader is written in Python 3.10.12 and uses [`instagrapi`](https://github.com/subzeroid/instagrapi) to download the stories, posts with captions, and profile pictures for an Instagram account. `instagrapi` requires a puppet Instagram account that it will use to browse stories and download posts. I recommend against using your personal Instagram account for this because `instagrapi` can get you marked for suspicious activity and/or banned. If you don't plan on editing the downloader script, you can skip these steps on your local machine. Here's how to get things set up locally and on the server:
-```bash
-#If you are still in server/
-$ cd ..
-$ cd account-downloader/
-```
-If you already have Python 3.10.12, you can skip this next step.
+I'm using  [`instaloader`](https://github.com/instaloader/instaloader) to grab posts from Instagram because it's able to consistently download posts without getting blocked. I tried to use it for stories too, but I ran into some authentication issues at the time. If you're curious, I wrote my own downloader (commit dd9779f58ee8d0efd0dc63bff498f9cc349717d5), which used [`instagrapi`](https://github.com/subzeroid/instagrapi) to download posts and stories. While this fixed the authentication issues and downloaded stories, this downloader never worked for long because the puppet accounts it used would be disabled by Instagram's anti-bot measures.  
+At the time of writing, `instaloader` is written in Python and is compatible with Python versions 3.8, 3.9, 3.10, and 3.11. Here's how to install Python if you need it:
 ```bash
 #Python 3.10 is supplied by this PPA if it isn't already a part of your distro's repository
 $ sudo add-apt-repository ppa:deadsnakes/ppa -y
-#I recommend doing this, although most repos do this automatically for you after adding a PPA. 
+#I recommend doing this, although most distros do this automatically for you after adding a PPA. 
 $ sudo apt-get update
 #Install Python
-$ sudo apt-get install python3.10 python3.10-dev python3.10-venv python3-pip -y
+$ sudo apt-get install python3.10 -y
 ```
-Set up the Python environment:
-```bash
-$ python3.10 -m venv env
-$ . env/bin/activate
-$ pip install -r requirements.txt
-```
-Note, if this is your first time using Python's virtual environments, you might be surprised by your shell being prefixed with something like `(env)`. This just means you are now using the virtual environment's Python, instead of the system-wide Python. If you want to go back to using the system-wide Python, either switch to a different shell or run `$ deactivate` in your prefixed shell. 
-
-
 ## The Server
 Here's how to get everything deployed. If you already have a server set up, you can skip to "Deploying".
 
@@ -107,8 +95,9 @@ $ sudo apt install nginx
 $ cd /etc/nginx/conf.d/
 $ sudo nano aggregator.conf
 $ sudo mkdir -p /var/www/instagram-aggregator/instagram/
-$ sudo chown -R <username>: /var/www/instagram-aggregator/
-$ sudo mkdir /var/www/webclient
+$ sudo chown -R $(whoami): /var/www/instagram-aggregator/
+$ sudo mkdir /var/www/webclient/
+$ sudo chown -R $(whoami): /var/www/webclient/
 ```
 Paste this into `aggregator.conf`:
 ```nginx 
@@ -150,7 +139,7 @@ $ sudo systemctl reload nginx
 After forwarding ports 80 and 443, you should now be able to access `http://<yourdomain>/`, but not `https://<yourdomain>/`.
 
 ### Adding HTTPS
-Follow [these instructions for installing `certbot`](https://certbot.eff.org/). On your server, run this command:
+Follow [these instructions for installing `certbot`](https://certbot.eff.org/). Then, on your server, run this command:
 ```bash
 $ sudo certbot --nginx -d <yourdomain> -d <yourdomain>
 $ sudo systemctl reload nginx
@@ -164,18 +153,12 @@ On the computer you `git cloned`'d this repository on, make the following change
 In `deploy.sh`, make the following changes:
 ```bash
 #Build the webclient
-( cd client && npm run build && cd build && scp -r * <username>@<server address>:/var/www/webclient ) &
+( cd client && npm run build && cd build && scp -r * <remote username>@<server address>:/var/www/webclient ) &
 
 #Build the server
-( cd server && npm run build && cd dist && scp -r * <username>@<server address>:/opt/instagram-aggregator ) &
-
-#Copy over the download script
-scp account-downloader/*.py <username>@<server address>:/opt/account-downloader &
+( cd server && npm run build && cd dist && scp -r * <remote username>@<server address>:/opt/instagram-aggregator ) &
 
 wait
-
-#Restart the server
-ssh <username>@<server address> -C "sudo systemctl restart instagram-aggregator.service"
 ```
 Change this line in `client/src/App.tsx` from
 ```TypeScript
@@ -196,59 +179,35 @@ const account = new Account(new fs(base), "https://api.<your domain>/instagram/"
 2. Make some folders on the server
 ```bash
 $ sudo mkdir /opt/instagram-aggregator
-$ sudo chown <username>: /opt/instagram-aggregator
-$ sudo mkdir /opt/account-downloader
-$ sudo chown <username>: /opt/account-downloader
+$ sudo chown $(whoami): /opt/instagram-aggregator
+$ sudo mkdir /opt/instaloader
+$ sudo chown $(whoami): /opt/instaloader
 ```
-3. Add a service to the server
-
-Run this command on your server `$ sudo nano /lib/systemd/system/instagram-aggregator.service`, and paste the following into it:
-```ini
-[Unit]
-Description=Instagram Aggregator
-After=syslog.target network-online.target remote-fs.target nss-lookup.target
-Wants=network-online.target
-
-[Service]
-ExecStart=node index.js
-Environment="DATA=/var/www/instagram-aggregator/instagram"
-WorkingDirectory=/opt/instagram-aggregator
-
-[Install]
-WantedBy=multi-user.target
-```
-Then run:
-```bash
-$ sudo systemctl enable instagram-aggregator
-```
-4. Set up `Python` and `node` on your server the same way you set it up on the computer where you `git cloned`'d this repository.
-5.  Set up `server/` and `account-downloader/` on the server.
+3. Set up `Python` and `node` on your server the same way you set it up on the computer where you `git cloned`'d this repository.
+4.  Set up `server/` and `instaloader/` on the server.
 
 On the computer where you `git cloned`'d this repository:
 ```bash
-$ scp server/package.json <username>@<server address>:/opt/instagram-aggregator
-$ scp account-downloader/requirements.txt <username>@<server address>:/opt/account-downloader
+$ scp server/package.json <remote username>@<server address>:/opt/instagram-aggregator
 ```
 On the server:
 ```bash
 $ cd /opt/instagram-aggregator
 $ npm i
-$ cd /opt/account-downloader
-$ python3.10 -m venv env
-$ . env/bin/activate
-$ pip install -r requirements.txt
+$ cd ..
+$ git clone https://github.com/instaloader/instaloader.git /opt/instaloader/
 ```
 
-6. Run `$ ./deploy.sh` on the computer where you `git cloned`'d this repository.
-7. Modify your `crontab`
+5. Run `$ ./deploy.sh` on the computer where you `git cloned`'d this repository.
+6. Modify your `crontab`
 
 On your server, run `$ crontab -e`
 Add this line to automatically update the Instagram post database every day at 9am:
 ```
-0 9 * * * /opt/account-downloader/env/bin/python3 /opt/account-downloader/downloader.py --outputdir /var/www/instagram-aggregator/instagram/ --username <your puppet account username> --password '<your puppet account password>' --account <a space seperated list of accounts to download>
+0 9 * * * cd /var/www/instagram-aggregator/ && python3 /opt/instaloader/instaloader.py --fast-update <a space seperated list of accounts to download> > /dev/null
 ```
 ... and then manually run that command right now to build the database:
-`$ /opt/account-downloader/env/bin/python3 /opt/account-downloader/downloader.py --outputdir /var/www/instagram-aggregator/instagram/ --username <your puppet account username> --password '<your puppet account password>' --account <a space seperated list of accounts to download>`
+`$ cd /var/www/instagram-aggregator/ && python3 /opt/instaloader/instaloader.py --fast-update <a space seperated list of accounts to download>`
 
 ### Celebrate!
 
