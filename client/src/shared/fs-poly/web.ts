@@ -21,33 +21,24 @@ export class fs implements fsPoly {
   }
   
   //Has the potential to really beat a server up
-  //Could use a lock or something, but for my case, I don't need that.
   async readdir(path: string, recursive: boolean): Promise<string[]> {
-    return (await this.int_readdir(path, recursive)).map(p => canonicalize(path, p));
+    return this._readdir(path, recursive, undefined);
   }
-  private async int_readdir(path: string, recursive: boolean): Promise<string[]> {
+  private async _readdir(path: string, recursive: boolean, previousPath?: string): Promise<string[]> {
     const resp = await fetch(`${this.base}/${path}`);
     const listing: NginxListing[] = await resp.json();
     
-    const listingAsPath = listing.map(l => `${path}/${l.name}`);
+    const listingAsPath = listing.map(l => `${!!previousPath ? previousPath : ''}${l.name}`);
     
     if (recursive) {
       const dirs = listing.filter(l => l.type === "directory");
       const recListings = await Promise.all(
-        dirs.map(d => this.int_readdir(`${path}/${d.name}`, true))
+        dirs.map(d => this._readdir(`${path}/${d.name}`, true, !!previousPath ? `${previousPath}${d.name}/` : `${d.name}/`))
       );
       
       return listingAsPath.concat(recListings.flat());
     } else {
       return listingAsPath;
     }
-  }
-}
-
-function canonicalize(base: string, path: string): string {
-  if (path.startsWith(`${base}/`)) {
-    return path.substring(base.length + 1);
-  } else {
-    return path;
   }
 }
