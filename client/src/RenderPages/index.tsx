@@ -10,7 +10,7 @@ interface RenderPagesProps {
 
 export function RenderPages({ posts }: RenderPagesProps) {
   return <>{posts.map(p => (
-    <Fragment key={p.page.name}>
+    <Fragment key={p.time}>
       <Profile name={p.page.name} src={p.page.profile} />
       <RenderPost post={p} />
     </Fragment>

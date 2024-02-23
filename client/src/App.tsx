@@ -4,15 +4,11 @@ import { RenderPages } from "./RenderPages";
 
 import { fs } from "./shared/fs-poly/web";
 import { Account } from "./shared/loadData";
+import { API, API_HOST } from "./shared/const";
 
 import ReactGA from 'react-ga4';
 
-let API = "https://api.magnusfulton.com/instagram/";
-
-let API_HOST = `${API}api`;
-if (process.env.NODE_ENV === "development") API_HOST = "http://localhost:3000/instagram/api";
-
-const promise = (async () => {
+async function loadPosts() {
   try {
     //The API server is faster, but might be crashed
     const resp = await fetch(API_HOST);
@@ -23,23 +19,19 @@ const promise = (async () => {
     const account = new Account(new fs(API), API);
     return await account.getPosts();
   }
-})();
+};
 
 export function App() {
   const [value, setValue] = useState<Post[] | undefined>(undefined);
-  const [resolved, setResolved] = useState(false);
   
   useEffect(() => {
     ReactGA.initialize('G-YSNQML280F');
     ReactGA.send("pageview");
+
+    loadPosts().then(setValue);
   }, []);
 
-  useEffect(() => {
-    promise.then(setValue);
-    setResolved(true);
-  }, []);
-
-  if (resolved && !!value) {
+  if (!!value) {
     return <RenderPages posts={value} />
   } else {
     return null;
