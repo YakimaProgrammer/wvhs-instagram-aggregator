@@ -5,3 +5,5 @@
 ( cd server && npm run build && cd dist && scp -r * hp:/opt/instagram-aggregator ) &
 
 wait
+
+ssh hp -C "sudo systemctl restart instagram-aggregator.service"

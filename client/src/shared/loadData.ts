@@ -15,7 +15,6 @@ const LAST_WEEK = Date.UTC(
   TODAY_UTC.getUTCDate() - 7
 );
 
-
 export class Account {
   fs: fsPoly;
   urlBase: string;
@@ -29,8 +28,10 @@ export class Account {
 
   async getPosts(): Promise<Post[]> {
     const allFiles = await this.fs.readdir(this.targetDir, true);
-    const protoPosts = selectAllPostsBefore(allFiles, LAST_WEEK);
+    const protoPosts = selectAllPostsAfter(allFiles, LAST_WEEK);
     const profiles = selectProfilePictures(allFiles);
+
+    debugger;
     
     return await Promise.all(protoPosts.map(p => this.processPost(p, profiles)));
   }
@@ -66,7 +67,7 @@ export class Account {
  * @param {number} cutoff a unix timestamp to that marks the oldest acceptable post  
  * @returns {ProtoPost[]} a collection of [timestamp: number, file names: string[]].
  */
-function selectAllPostsBefore(posts: string[], cutoff: number): ProtoPost[] {
+function selectAllPostsAfter(posts: string[], cutoff: number): ProtoPost[] {
   const grouped: Record<number, string[]> = groupBy(posts, p => {
     const m = p.match(FILTER);
     if (!!m) {
