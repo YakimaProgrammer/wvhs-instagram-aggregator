@@ -8,13 +8,6 @@ const FILTER =
 
 type ProtoPost = [number, string[]];
 
-const TODAY_UTC = new Date(Date.now());
-const LAST_WEEK = Date.UTC(
-  TODAY_UTC.getUTCFullYear(),
-  TODAY_UTC.getUTCMonth(),
-  TODAY_UTC.getUTCDate() - 7
-);
-
 export class Account {
   fs: fsPoly;
   urlBase: string;
@@ -27,12 +20,16 @@ export class Account {
   }
 
   async getPosts(): Promise<Post[]> {
+    const TODAY_UTC = new Date(Date.now());
+    const LAST_WEEK = Date.UTC(
+      TODAY_UTC.getUTCFullYear(),
+      TODAY_UTC.getUTCMonth(),
+      TODAY_UTC.getUTCDate() - 7
+    );
+
     const allFiles = await this.fs.readdir(this.targetDir, true);
     const protoPosts = selectAllPostsAfter(allFiles, LAST_WEEK);
     const profiles = selectProfilePictures(allFiles);
-
-    debugger;
-    
     return await Promise.all(protoPosts.map(p => this.processPost(p, profiles)));
   }
 
