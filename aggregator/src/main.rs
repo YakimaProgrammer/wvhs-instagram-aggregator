@@ -26,8 +26,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   let mut posts: Vec<Post> = Vec::new();
   for entry in fs::read_dir(args.directory)? {
-    let entry = entry?;
-    posts.append(&mut parse_directory(entry.path()).expect("the directory to parse correctly"));
+    let path = entry?.path();
+    if path.is_dir() {
+      posts.append(&mut parse_directory(path).expect("the directory to parse correctly"));
+    }
   }
 
   posts.sort();
