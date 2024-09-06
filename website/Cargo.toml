@@ -4,4 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+gloo-net = "0.6.0"
+wasm-bindgen-futures = "0.4.43"
 yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
+serde.workspace = true
+post = { path = "../post" }
