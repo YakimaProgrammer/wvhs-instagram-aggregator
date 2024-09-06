@@ -1,10 +1,10 @@
 use post::Post;
-use std::sync::Arc;
+use std::rc::Rc;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct PostsProps {
-  pub posts: Arc<Vec<Post>>,
+  pub posts: Rc<Vec<Post>>,
 }
 
 /// Displays a collection of `Post`s
