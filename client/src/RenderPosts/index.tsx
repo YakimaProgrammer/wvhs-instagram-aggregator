@@ -1,3 +1,4 @@
+import { API_ENDPOINT } from "../endpoint";
 import { Post } from "../shared/Post";
 import { DateDisplay } from "./DateDisplay";
 import { BasicSlideshow } from "./Slideshow";
@@ -11,26 +12,27 @@ interface RenderPostProps {
 export function RenderPost({ post }: RenderPostProps) {
   return (
     <div className={style.post}>
-      <h2 className={style.date}><DateDisplay date={new Date(post.time)} /></h2>
-      <PostImages srcs={post.srcs} />
+      <h2 className={style.date}><DateDisplay date={new Date(post.time * 1_000)} /></h2>
+      <PostImages srcs={post.srcs} profile_name={post.profile_name} />
       <p>{post.caption}</p>
     </div>
   )
 }
 
 interface PostImagesProps {
+  profile_name: string;
   srcs: string[];
 }
 
-function PostImages({srcs} : PostImagesProps) {
+function PostImages({ srcs, profile_name } : PostImagesProps) {
   if (srcs.length === 0 ) {
     return null;
   } else if (srcs.length === 1) {
-    return <RenderPostMedia src={srcs[0]} />
+    return <RenderPostMedia src={`${API_ENDPOINT}/${profile_name}/${srcs[0]}`} />
   } else {
     return (
       <BasicSlideshow slideChangeDelay={5000}>
-        {srcs.map(src => <RenderPostMedia src={src} key={src} />)}
+        {srcs.map(src => <RenderPostMedia src={`${API_ENDPOINT}/${profile_name}/${src}`} key={src} />)}
       </BasicSlideshow>
     )
   }
